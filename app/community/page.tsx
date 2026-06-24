@@ -164,18 +164,18 @@ export default function Community() {
               <Users size={18} />
               <span>Support Groups</span>
             </Link>
-            <Link href="/dashboard" target="_blank" className="subapp-nav-link">
+            <a href={process.env.NEXT_PUBLIC_DASHBOARD_URL || 'http://localhost:3001'} target="_blank" rel="noopener noreferrer" className="subapp-nav-link">
               <User size={18} />
               <span>My Profile</span>
-            </Link>
+            </a>
           </nav>
         </div>
 
         <div className="subapp-sidebar-bottom">
-          <Link href="/dashboard" target="_blank" className="subapp-nav-link">
+          <a href={process.env.NEXT_PUBLIC_DASHBOARD_URL || 'http://localhost:3001'} target="_blank" rel="noopener noreferrer" className="subapp-nav-link">
             <Settings size={18} />
             <span>Settings</span>
-          </Link>
+          </a>
           <div className="subapp-nav-link" onClick={() => router.push('/')}>
             <Info size={18} />
             <span>About SafeLine</span>
@@ -196,7 +196,7 @@ export default function Community() {
             <button style={styles.headerIconBtn} aria-label="Chat">
               <MessageCircle size={18} color="#323244" />
             </button>
-            <button onClick={() => window.open('/dashboard', '_blank')} className="btn btn-secondary" style={styles.supportBadge}>
+            <button onClick={() => window.open(process.env.NEXT_PUBLIC_DASHBOARD_URL || 'http://localhost:3001', '_blank')} className="btn btn-secondary" style={styles.supportBadge}>
               Support
             </button>
             <div style={styles.avatarImgMock}>

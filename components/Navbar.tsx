@@ -44,11 +44,8 @@ export default function Navbar() {
 
   const handleDashboardClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!isLoggedIn) {
-      window.open('/auth', '_blank');
-    } else {
-      window.open('/dashboard', '_blank');
-    }
+    const dashboardUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL || 'http://teen-helpline-dashboard.vercel.app/';
+    window.open(dashboardUrl, '_blank');
   };
 
   const navLinks = [

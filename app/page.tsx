@@ -177,9 +177,9 @@ export default function Home() {
               <h3 style={styles.moodBannerTitle}>Release the Heat</h3>
               <p style={styles.moodQuoteText}>"It's okay to blow off steam. Let's pop some bubbles and release the heat! 🌋"</p>
               <div style={styles.moodBannerActions}>
-                <Link href="/dashboard" target="_blank" style={styles.moodBtn} className="btn btn-secondary">
+                <a href={process.env.NEXT_PUBLIC_DASHBOARD_URL || 'http://localhost:3001'} target="_blank" rel="noopener noreferrer" style={styles.moodBtn} className="btn btn-secondary">
                   Write in Private Journal
-                </Link>
+                </a>
                 <Link href="/calm-zone" style={styles.moodBtnTeal} className="btn btn-primary">
                   Play Bubble Burst
                 </Link>
@@ -213,9 +213,9 @@ export default function Home() {
               <h3 style={styles.moodBannerTitle}>Cherish This Peace</h3>
               <p style={styles.moodQuoteText}>"Peace looks beautiful on you. Keep relaxing, dost!"</p>
               <div style={styles.moodBannerActions}>
-                <Link href="/dashboard" target="_blank" style={styles.moodBtn} className="btn btn-secondary">
+                <a href={process.env.NEXT_PUBLIC_DASHBOARD_URL || 'http://localhost:3001'} target="_blank" rel="noopener noreferrer" style={styles.moodBtn} className="btn btn-secondary">
                   Go to Dashboard Journal
-                </Link>
+                </a>
                 <Link href="/calm-zone" style={styles.moodBtnTeal} className="btn btn-primary">
                   Play Sleep Soundscapes
                 </Link>

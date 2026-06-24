@@ -70,7 +70,7 @@ export default function Counselors() {
       setTimeout(() => {
         closeBookingModal();
         // Redirect to dashboard to see active booking card in a new tab
-        window.open('/dashboard', '_blank');
+        window.open(process.env.NEXT_PUBLIC_DASHBOARD_URL || 'http://localhost:3001', '_blank');
       }, 1500);
     } catch (err) {
       alert('Error booking session. Please try again.');
