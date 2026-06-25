@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
-  Heart, Compass, MessageCircle, BookOpen, Users, User, Settings, Info,
-  Bell, HelpCircle, Play, Headset, FileText, ArrowRight, ShieldCheck, Send, CheckCircle2, Smile, X
+  Compass, MessageCircle, BookOpen, Users, Info,
+  Bell, HelpCircle, Play, Headset, FileText, ArrowRight, ShieldCheck, Send, CheckCircle2, Smile, X, Menu
 } from 'lucide-react';
 import { dbService } from '../../lib/supabase';
 
@@ -23,7 +23,7 @@ export default function Community() {
   // Interactive States
   const [joined, setJoined] = useState(false);
   const [memberCount, setMemberCount] = useState(124);
-  const [rsvpStatus, setRsvpStatus] = useState<'rsvp' | 'going'>('rsvp');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Chat States
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
@@ -61,17 +61,6 @@ export default function Community() {
       // Award Points
       dbService.addPoints(5, 'user123');
       window.dispatchEvent(new Event('profileUpdated'));
-    }
-  };
-
-  const handleRSVPToggle = () => {
-    if (rsvpStatus === 'rsvp') {
-      setRsvpStatus('going');
-      // Award Points
-      dbService.addPoints(5, 'user123');
-      window.dispatchEvent(new Event('profileUpdated'));
-    } else {
-      setRsvpStatus('rsvp');
     }
   };
 
@@ -136,49 +125,63 @@ export default function Community() {
       
       {/* LEFT SIDEBAR (Screenshot Replica) */}
       <aside className="subapp-sidebar">
-        <div className="subapp-sidebar-top">
-          <div className="subapp-logo" onClick={() => router.push('/')}>
-            <div style={styles.logoIcon}>
-              <Heart size={20} fill="#20BEE8" color="#20BEE8" />
+        <div className="subapp-sidebar-top" style={{ width: '100%' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <div className="subapp-logo" onClick={() => router.push('/')}>
+              <img src="/logo_icon.png" alt="TeenHelpline Logo" style={{ height: '32px', width: '32px', objectFit: 'contain' }} />
+              <div>
+                <span className="subapp-logo-text">TeenHelpline</span>
+                <span className="subapp-logo-sub">Community Support</span>
+              </div>
             </div>
-            <div>
-              <span className="subapp-logo-text">SafeLine</span>
-              <span className="subapp-logo-sub">Community Support</span>
-            </div>
+            
+            {/* Hamburger Toggle (visible on mobile only) */}
+            <button 
+              className="subapp-hamburger" 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle Menu"
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'none',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '0.4rem',
+                color: '#323244'
+              }}
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
 
-          <button onClick={() => setShowHelpModal(true)} className="btn btn-primary" style={styles.sidebarHelpBtn}>
-            Get Help Now
-          </button>
+          {/* Collapsible Sidebar Content on mobile */}
+          <div className={`subapp-sidebar-content ${mobileMenuOpen ? 'open' : ''}`} style={{ width: '100%' }}>
+            <button onClick={() => setShowHelpModal(true)} className="btn btn-primary" style={{ ...styles.sidebarHelpBtn, width: '100%', marginBottom: '1.5rem', marginTop: '1.5rem' }}>
+              Get Help Now
+            </button>
 
-          <nav className="subapp-nav">
-            <Link href="/" className="subapp-nav-link">
-              <Compass size={18} />
-              <span>Home</span>
-            </Link>
-            <Link href="/resources" className="subapp-nav-link">
-              <BookOpen size={18} />
-              <span>Resources</span>
-            </Link>
-            <Link href="/community" className="subapp-nav-link active">
-              <Users size={18} />
-              <span>Support Groups</span>
-            </Link>
-            <a href={process.env.NEXT_PUBLIC_DASHBOARD_URL || 'http://localhost:3001'} target="_blank" rel="noopener noreferrer" className="subapp-nav-link">
-              <User size={18} />
-              <span>My Profile</span>
-            </a>
-          </nav>
-        </div>
-
-        <div className="subapp-sidebar-bottom">
-          <a href={process.env.NEXT_PUBLIC_DASHBOARD_URL || 'http://localhost:3001'} target="_blank" rel="noopener noreferrer" className="subapp-nav-link">
-            <Settings size={18} />
-            <span>Settings</span>
-          </a>
-          <div className="subapp-nav-link" onClick={() => router.push('/')}>
-            <Info size={18} />
-            <span>About SafeLine</span>
+            <nav className="subapp-nav">
+              <Link href="/" className="subapp-nav-link">
+                <Compass size={18} />
+                <span>Home</span>
+              </Link>
+              <Link href="/resources" className="subapp-nav-link">
+                <BookOpen size={18} />
+                <span>Resources</span>
+              </Link>
+              <Link href="/community" className="subapp-nav-link active">
+                <Users size={18} />
+                <span>Support Groups</span>
+              </Link>
+            </nav>
+            
+            <div className="subapp-sidebar-bottom" style={{ marginTop: '2rem' }}>
+              <div className="subapp-nav-link" onClick={() => router.push('/')}>
+                <Info size={18} />
+                <span>About TeenHelpline</span>
+              </div>
+            </div>
           </div>
         </div>
       </aside>
@@ -187,19 +190,19 @@ export default function Community() {
       <main className="subapp-content-canvas" style={{ backgroundColor: '#FAF9F6' }}>
         
         {/* Sub-Website Top Bar Header */}
-        <header style={styles.contentHeader}>
-          <h2 style={styles.contentHeaderTitle}>Stress Management Group</h2>
-          <div style={styles.headerRightWidgets}>
-            <button style={styles.headerIconBtn} aria-label="Notifications">
+        <header className="comm-content-header">
+          <h2 className="comm-content-header-title">Stress Management Group</h2>
+          <div className="comm-header-right-widgets">
+            <button className="comm-header-icon-btn" aria-label="Notifications">
               <Bell size={18} color="#323244" />
             </button>
-            <button style={styles.headerIconBtn} aria-label="Chat">
+            <button className="comm-header-icon-btn" aria-label="Chat">
               <MessageCircle size={18} color="#323244" />
             </button>
-            <button onClick={() => window.open(process.env.NEXT_PUBLIC_DASHBOARD_URL || 'http://localhost:3001', '_blank')} className="btn btn-secondary" style={styles.supportBadge}>
+            <button onClick={() => window.open(process.env.NEXT_PUBLIC_DASHBOARD_URL || 'http://localhost:3001', '_blank')} className="btn btn-secondary comm-support-badge">
               Support
             </button>
-            <div style={styles.avatarImgMock}>
+            <div className="comm-avatar-img-mock">
               <Smile size={18} color="#20BEE8" />
             </div>
           </div>
@@ -251,42 +254,9 @@ export default function Community() {
         {/* TWO COLUMN GRID */}
         <div className="comm-main-grid">
           
-          {/* LEFT COLUMN: WEEKLY CHECK-IN & CHAT */}
+          {/* LEFT COLUMN: CHAT */}
           <div>
             
-            {/* Weekly Check-in Section */}
-            <div className="card" style={{ marginBottom: '2rem', padding: '1.8rem' }}>
-              <div style={styles.sectionHeaderLine}>
-                <Compass size={18} color="#20BEE8" />
-                <h3 style={styles.sectionTitle}>Weekly Check-in</h3>
-              </div>
-
-              <div style={styles.workshopCard}>
-                <div style={styles.workshopHeader}>
-                  <h4 style={styles.workshopTitle}>Mindfulness Techniques Workshop</h4>
-                  <span style={styles.startsInBadge}>Starts in 2h</span>
-                </div>
-                <p style={styles.workshopText}>
-                  Join us for a guided session on practical mindfulness exercises to manage daily stress. All members welcome.
-                </p>
-                <div style={styles.workshopFooter}>
-                  <span style={styles.facilitatorName}>👤 Posted by Facilitator Sarah</span>
-                  <button 
-                    onClick={handleRSVPToggle} 
-                    className="btn btn-text"
-                    style={{
-                      color: rsvpStatus === 'going' ? 'var(--success-green)' : 'var(--primary-teal)',
-                      fontWeight: 700,
-                      fontSize: '0.9rem',
-                      textDecoration: 'none'
-                    }}
-                  >
-                    {rsvpStatus === 'going' ? 'Going ✓' : 'RSVP'}
-                  </button>
-                </div>
-              </div>
-            </div>
-
             {/* Group Support Chat Section */}
             <div className="chat-container-card">
               <div className="chat-header-bar">
@@ -381,32 +351,7 @@ export default function Community() {
               </div>
             </div>
 
-            {/* Group Info Panel */}
-            <div className="card" style={{ padding: '1.8rem' }}>
-              <h3 style={{ ...styles.sidebarPanelTitle, marginBottom: '1rem' }}>Group Info</h3>
-              
-              <div style={styles.infoTagsContainer}>
-                <span style={styles.infoTag}>#StressRelief</span>
-                <span style={styles.infoTag}>#Anxiety</span>
-                <span style={styles.infoTag}>#WorkLife</span>
-                <span style={styles.infoTag}>#Mindfulness</span>
-              </div>
 
-              <div style={styles.groupInfoStatsList}>
-                <div style={styles.statRow}>
-                  <span style={styles.statLabel}>Next Meeting</span>
-                  <strong style={styles.statValue}>Today, 6:00 PM</strong>
-                </div>
-                <div style={styles.statRow}>
-                  <span style={styles.statLabel}>Members Active</span>
-                  <strong style={styles.statValue} className="animate-pop">{memberCount}</strong>
-                </div>
-                <div style={styles.statRow}>
-                  <span style={styles.statLabel}>Group Type</span>
-                  <strong style={styles.statValue}>Open, Moderated</strong>
-                </div>
-              </div>
-            </div>
 
           </div>
         </div>
@@ -455,16 +400,6 @@ export default function Community() {
 
 // Inline Styles
 const styles: Record<string, React.CSSProperties> = {
-  logoIcon: {
-    width: '38px',
-    height: '38px',
-    borderRadius: '12px',
-    backgroundColor: '#FAF9F6',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    border: '1px solid rgba(32, 190, 232, 0.15)'
-  },
   sidebarHelpBtn: {
     backgroundColor: '#323244',
     color: '#ffffff',
@@ -475,51 +410,6 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: '0 4px 10px rgba(197, 48, 48, 0.25)',
     fontWeight: 'bold',
     cursor: 'pointer'
-  },
-  contentHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '2.5rem',
-    borderBottom: '1px solid rgba(32, 190, 232, 0.15)',
-    paddingBottom: '1rem'
-  },
-  contentHeaderTitle: {
-    fontSize: '1.6rem',
-    fontWeight: 800,
-    color: '#323244',
-    letterSpacing: '-0.5px'
-  },
-  headerRightWidgets: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.8rem'
-  },
-  headerIconBtn: {
-    width: '38px',
-    height: '38px',
-    borderRadius: '50%',
-    backgroundColor: '#ffffff',
-    border: '1px solid rgba(50, 50, 68, 0.1)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer'
-  },
-  supportBadge: {
-    padding: '0.45rem 1rem',
-    fontSize: '0.82rem',
-    fontWeight: 700
-  },
-  avatarImgMock: {
-    width: '38px',
-    height: '38px',
-    borderRadius: '50%',
-    backgroundColor: '#FAF9F6',
-    border: '1px solid var(--primary-teal)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
   },
   avatarPillsStacked: {
     display: 'flex',
@@ -537,60 +427,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1.5px solid #FAF9F6',
     fontWeight: 'bold'
   },
-  sectionHeaderLine: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    marginBottom: '1rem'
-  },
-  sectionTitle: {
-    fontSize: '1.15rem',
-    fontWeight: 800,
-    color: '#323244'
-  },
-  workshopCard: {
-    backgroundColor: '#FAF9F6',
-    borderRadius: '16px',
-    padding: '1.2rem 1.5rem',
-    border: '1px solid var(--border-soft)'
-  },
-  workshopHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '0.5rem'
-  },
-  workshopTitle: {
-    fontSize: '0.98rem',
-    fontWeight: 700,
-    color: '#323244'
-  },
-  startsInBadge: {
-    fontSize: '0.72rem',
-    fontWeight: 700,
-    color: '#B7791F',
-    backgroundColor: '#FFC0C1',
-    padding: '0.2rem 0.6rem',
-    borderRadius: '6px'
-  },
-  workshopText: {
-    fontSize: '0.88rem',
-    color: '#323244',
-    lineHeight: 1.4,
-    marginBottom: '1rem'
-  },
-  workshopFooter: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderTop: '1px solid rgba(143,158,139,0.08)',
-    paddingTop: '0.8rem'
-  },
-  facilitatorName: {
-    fontSize: '0.8rem',
-    color: '#20BEE8',
-    fontWeight: 600
-  },
+
   moderatedBadge: {
     display: 'inline-flex',
     alignItems: 'center',
@@ -625,40 +462,6 @@ const styles: Record<string, React.CSSProperties> = {
   viewAllLink: {
     fontSize: '0.82rem',
     color: 'var(--primary-teal)',
-    fontWeight: 700
-  },
-  infoTagsContainer: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '0.4rem',
-    marginBottom: '1.2rem'
-  },
-  infoTag: {
-    fontSize: '0.75rem',
-    fontWeight: 600,
-    color: '#323244',
-    backgroundColor: '#EDF2F7',
-    padding: '0.25rem 0.5rem',
-    borderRadius: '6px'
-  },
-  groupInfoStatsList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.8rem',
-    borderTop: '1px solid var(--border-soft)',
-    paddingTop: '1rem'
-  },
-  statRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontSize: '0.85rem'
-  },
-  statLabel: {
-    color: '#20BEE8',
-    fontWeight: 500
-  },
-  statValue: {
-    color: '#323244',
     fontWeight: 700
   },
   // Modal viewer on front page

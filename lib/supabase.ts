@@ -21,7 +21,7 @@ const MOCK_COUNSELORS = [
     expertise: 'Exam Stress & Anxiety Specialist',
     experience: '8 years',
     availability: 'Available Today',
-    photo: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200',
+    photo: 'https://images.unsplash.com/photo-1589156280159-27698a70f29e?auto=format&fit=crop&q=80&w=200',
     verification: true
   },
   {
@@ -30,7 +30,7 @@ const MOCK_COUNSELORS = [
     expertise: 'Student Mentor & Bullying Support',
     experience: '5 years',
     availability: 'Available Tomorrow',
-    photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
+    photo: 'https://images.unsplash.com/photo-1607990283143-e81e7a2c93ab?auto=format&fit=crop&q=80&w=200',
     verification: true
   },
   {
@@ -39,7 +39,7 @@ const MOCK_COUNSELORS = [
     expertise: 'Family Dynamics & Relationship Coach',
     experience: '12 years',
     availability: 'Slots available',
-    photo: 'https://images.unsplash.com/photo-1594744803329-e58b31de215f?auto=format&fit=crop&q=80&w=200',
+    photo: 'https://images.unsplash.com/photo-1582750433449-64935ef79b5f?auto=format&fit=crop&q=80&w=200',
     verification: true
   }
 ];
@@ -189,6 +189,32 @@ export const dbService = {
     if (isOnline() && userId !== 'guest') {
       const { data, error } = await supabase!.from('profiles').select('*').eq('id', userId).single();
       if (!error && data) return data as Profile;
+
+      // Auto-create profile row if it doesn't exist for the logged in user
+      if (error && (error.code === 'PGRST116' || error.message.includes('JSON object'))) {
+        try {
+          const { data: { user } } = await supabase!.auth.getUser();
+          if (user) {
+            const emailName = user.email ? user.email.split('@')[0] : 'Student';
+            const newProfile = {
+              id: userId,
+              display_name: user.user_metadata?.display_name || emailName,
+              buddy_name: 'Buddy',
+              buddy_avatar: 'avatar1',
+              buddy_personality: 'Cheerful',
+              points: 15
+            };
+            const { data: insertedData, error: insertError } = await supabase!
+              .from('profiles')
+              .insert(newProfile)
+              .select()
+              .single();
+            if (!insertError && insertedData) return insertedData as Profile;
+          }
+        } catch (authErr) {
+          console.error("Failed to fetch user to auto-create profile:", authErr);
+        }
+      }
     }
     const profile = localStorage.getItem('th_profile');
     return profile ? JSON.parse(profile) : {
@@ -205,7 +231,7 @@ export const dbService = {
   updateProfile: async (profile: Partial<Profile>, userId: string = 'guest'): Promise<Profile> => {
     initLocalStorage();
     if (isOnline() && userId !== 'guest') {
-      const { data, error } = await supabase!.from('profiles').update(profile).eq('id', userId).select().single();
+      const { data, error } = await supabase!.from('profiles').upsert({ id: userId, ...profile }).select().single();
       if (!error && data) return data as Profile;
     }
     const current = await dbService.getProfile(userId);
@@ -458,12 +484,36 @@ export const dbService = {
   // Goals
   getGoals: async (userId: string = 'guest'): Promise<Goal[]> => {
     initLocalStorage();
+    if (isOnline() && userId !== 'guest') {
+      const { data, error } = await supabase!
+        .from('goals')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: true });
+      if (!error && data) return data as Goal[];
+    }
     const goalsStr = localStorage.getItem('th_goals');
     return goalsStr ? JSON.parse(goalsStr) : [];
   },
 
   toggleGoal: async (goalId: string, userId: string = 'guest'): Promise<Goal[]> => {
     initLocalStorage();
+    if (isOnline() && userId !== 'guest') {
+      const { data: currentGoal, error: fetchErr } = await supabase!
+        .from('goals')
+        .select('completed')
+        .eq('id', goalId)
+        .single();
+      if (!fetchErr && currentGoal) {
+        const { error: updateErr } = await supabase!
+          .from('goals')
+          .update({ completed: !currentGoal.completed })
+          .eq('id', goalId);
+        if (!updateErr) {
+          return dbService.getGoals(userId);
+        }
+      }
+    }
     const current = await dbService.getGoals(userId);
     const updated = current.map(g => {
       if (g.id === goalId) {
@@ -485,6 +535,19 @@ export const dbService = {
       completed: false,
       frequency
     };
+    if (isOnline() && userId !== 'guest') {
+      const { data, error } = await supabase!
+        .from('goals')
+        .insert({
+          user_id: userId,
+          title,
+          frequency,
+          completed: false
+        })
+        .select()
+        .single();
+      if (!error && data) return data as Goal;
+    }
     const current = await dbService.getGoals(userId);
     current.push(newGoal);
     localStorage.setItem('th_goals', JSON.stringify(current));

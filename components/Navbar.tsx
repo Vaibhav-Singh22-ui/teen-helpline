@@ -37,8 +37,8 @@ export default function Navbar() {
     };
   }, [pathname]);
 
-  // Hide Navbar completely on the Dashboard sub-website
-  if (pathname && pathname.startsWith('/dashboard')) {
+  // Hide Navbar completely on the Dashboard and Community sub-websites
+  if (pathname && (pathname.startsWith('/dashboard') || pathname.startsWith('/community'))) {
     return null;
   }
 
